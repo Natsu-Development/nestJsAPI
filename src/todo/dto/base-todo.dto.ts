@@ -1,3 +1,7 @@
+import { IsNotEmpty, MinLength } from 'class-validator';
+
 export class BaseTodoDto {
-  name: string;
+  @IsNotEmpty()
+  @MinLength(3)
+  todoName: string;
 }

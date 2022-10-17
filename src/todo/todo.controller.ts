@@ -9,8 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { query } from 'express';
-import { CreateTodoDto } from './dto/create-todo.dto';
-import { UpdateTodoDto } from './dto/update-todo.dto';
+import { BaseTodoDto } from './dto/base-todo.dto';
 import { TodoService } from './todo.service';
 
 @Controller('todo')
@@ -27,22 +26,22 @@ export class TodoController {
   }
 
   @Get(':id')
-  async find(@Param('id') id: string) {
+  async find(@Param('id') id: number) {
     return await this.todoService.findOne(id);
   }
 
-  @Post('add')
-  async create(@Body() createTodoDto: CreateTodoDto) {
+  @Post()
+  async create(@Body() createTodoDto: BaseTodoDto) {
     return await this.todoService.createTodo(createTodoDto);
   }
 
-  @Put('update/:id')
-  async update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto) {
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() updateTodoDto: BaseTodoDto) {
     return await this.todoService.update(id, updateTodoDto);
   }
 
-  @Delete('delete/:id')
-  async delete(@Param('id') id: string) {
+  @Delete(':id')
+  async delete(@Param('id') id: number) {
     return await this.todoService.delete(id);
   }
 }

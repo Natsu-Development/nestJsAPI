@@ -1,45 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateTodoDto } from './dto/create-todo.dto';
-import { UpdateTodoDto } from './dto/update-todo.dto';
-import { Todo, TodoDocument } from './schemas/todo.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Todo } from 'src/typeorm';
+import { Repository, Like } from 'typeorm';
+import { BaseTodoDto } from './dto/base-todo.dto';
 
 @Injectable()
 export class TodoService {
-  // implement it to use all of method of mongoose
   constructor(
-    @InjectModel(Todo.name) private readonly model: Model<TodoDocument>
+    @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>
   ) {}
 
   async findAll(): Promise<Todo[]> {
-    return await this.model.find().exec();
+    return await this.todoRepository.find();
   }
 
-  async findOne(id: string): Promise<Todo> {
-    return await this.model.findById(id).exec();
+  createTodo(createTodo: BaseTodoDto): Promise<Todo> {
+    const newTodo = this.todoRepository.create(createTodo);
+    return this.todoRepository.save(newTodo);
   }
 
   async findByQuery(todoName: string): Promise<Todo[]> {
-    return await this.model
-      .find({ name: { $regex: todoName, $options: 'i' } })
-      .exec();
+    return await this.todoRepository.findBy({
+      todoName: Like(`%${todoName}%`),
+    });
   }
 
-  async createTodo(createTodo: CreateTodoDto): Promise<Todo> {
-    return await new this.model({
-      ...createTodo,
-      createdAt: new Date(),
-    }).save();
+  async findOne(id: number) {
+    return await this.todoRepository.findOneBy({ id: id });
   }
 
-  async update(id: string, updateTodo: UpdateTodoDto): Promise<Todo> {
-    return await this.model
-      .findByIdAndUpdate(id, updateTodo, { new: true })
-      .exec();
+  async update(id: number, updateTodo: BaseTodoDto) {
+    return await this.todoRepository.update({ id }, updateTodo);
   }
 
-  async delete(id: string): Promise<Todo> {
-    return await this.model.findByIdAndDelete(id).exec();
+  async delete(id: number) {
+    return await this.todoRepository.delete(id);
   }
 }
